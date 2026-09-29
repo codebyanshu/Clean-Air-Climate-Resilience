@@ -1,0 +1,74 @@
+# Clean Air Climate Resilience - Configuration
+
+paths:
+  raw_data_dir: "data/raw"
+  interim_data_dir: "data/interim"
+  processed_data_dir: "data/processed"
+  models_dir: "models"
+  reports_dir: "reports"
+  figures_dir: "reports/figures"
+
+data:
+  raw_files:
+    - city_day.csv
+    - city_hour.csv
+    - station_day.csv
+    - station_hour.csv
+    - stations.csv
+  
+  target_column: "AQI"
+  date_column: "Date"
+  city_column: "City"
+  
+  pollutant_columns:
+    - "PM2.5"
+    - "PM10"
+    - "NO2"
+    - "SO2"
+    - "CO"
+    - "O3"
+    - "NH3"
+    - "Benzene"
+    - "Toluene"
+    - "Xylene"
+
+preprocessing:
+  null_strategy: "median"
+  outlier_lower_quantile: 0.01
+  outlier_upper_quantile: 0.99
+  test_size: 0.2
+  random_state: 42
+
+features:
+  lag_periods: [1, 2, 3, 7, 30]
+  rolling_windows: [3, 7, 30]
+  seasonal_features: true
+  pollutant_interactions: true
+
+model:
+  type: "RandomForestRegressor"
+  hyperparameters:
+    n_estimators: 200
+    max_depth: 20
+    min_samples_split: 2
+    min_samples_leaf: 1
+    random_state: 42
+    n_jobs: -1
+  
+  param_grid:
+    n_estimators: [100, 200, 300]
+    max_depth: [10, 20, None]
+    min_samples_split: [2, 5]
+    min_samples_leaf: [1, 2]
+
+evaluation:
+  metrics:
+    - "RMSE"
+    - "MAE"
+    - "R2"
+    - "MAPE"
+  
+  plots:
+    - "predictions_vs_actual"
+    - "residuals"
+    - "feature_importance"
