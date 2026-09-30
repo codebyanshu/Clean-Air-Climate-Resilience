@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+import logging
+import os
 from pathlib import Path
+import threading
+import time
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 import pandas as pd
 import streamlit as st
@@ -8,6 +14,50 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[1]
 INTERIM_PATH = ROOT / "data" / "interim" / "city_day_clean.csv"
 RAW_PATH = ROOT / "data" / "raw" / "city_day.csv"
+KEEPALIVE_INTERVAL_SECONDS = 10 * 60
+
+
+@st.cache_resource
+def start_render_keepalive() -> bool:
+    """Ping this Render service periodically for a bounded time after startup.
+
+    Render sets RENDER_EXTERNAL_URL automatically. The background thread is
+    only a best-effort free-tier workaround; Render can still restart or stop
+    a free instance independently.
+    """
+    service_url = os.environ.get("RENDER_EXTERNAL_URL")
+    if not service_url:
+        return False
+
+    try:
+        requested_days = int(os.environ.get("KEEPALIVE_DAYS", "10"))
+    except ValueError:
+        requested_days = 10
+    keepalive_days = min(10, max(5, requested_days))
+
+    def ping_until_expiry() -> None:
+        deadline = time.monotonic() + keepalive_days * 24 * 60 * 60
+        while time.monotonic() < deadline:
+            time.sleep(KEEPALIVE_INTERVAL_SECONDS)
+            if time.monotonic() >= deadline:
+                break
+            try:
+                request = Request(service_url, headers={"User-Agent": "RenderKeepalive/1.0"})
+                with urlopen(request, timeout=20) as response:
+                    response.read(1)
+            except (OSError, URLError) as exc:
+                logging.warning("Render keep-alive request failed: %s", exc)
+
+    threading.Thread(
+        target=ping_until_expiry,
+        name="render-keepalive",
+        daemon=True,
+    ).start()
+    logging.info("Render keep-alive enabled for up to %s days", keepalive_days)
+    return True
+
+
+start_render_keepalive()
 
 
 @st.cache_data
