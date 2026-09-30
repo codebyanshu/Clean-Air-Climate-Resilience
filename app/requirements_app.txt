@@ -1,4 +1,6 @@
-streamlit
+# Pin Streamlit so Render deploys a consistent frontend bundle. The unpinned
+# latest release was producing browser-side SyntaxErrors across widgets/charts.
+streamlit==1.41.1
 pandas
 numpy
 scikit-learn

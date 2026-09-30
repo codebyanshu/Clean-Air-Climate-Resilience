@@ -11,6 +11,8 @@ from urllib.request import Request, urlopen
 import pandas as pd
 import streamlit as st
 
+st.set_page_config(page_title="Air Quality Dashboard", layout="wide")
+
 ROOT = Path(__file__).resolve().parents[1]
 INTERIM_PATH = ROOT / "data" / "interim" / "city_day_clean.csv"
 RAW_PATH = ROOT / "data" / "raw" / "city_day.csv"
@@ -101,8 +103,6 @@ def get_monthly_trends(df: pd.DataFrame) -> pd.DataFrame:
         .sort_values("Month")
     )
 
-
-st.set_page_config(page_title="Air Quality Dashboard", layout="wide")
 
 try:
     df = load_dataset()
