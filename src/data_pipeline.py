@@ -16,6 +16,7 @@ from sklearn.preprocessing import OneHotEncoder
 from .project_paths import INTERIM_DIR, MODELS_DIR, PROCESSED_DIR, PROJECT_ROOT, RAW_DIR, REPORTS_DIR, load_config
 
 
+
 def pollutant_columns() -> list[str]:
     config = load_config()
     columns = config.get("data", {}).get("pollutant_columns")
