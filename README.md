@@ -17,15 +17,7 @@ tests/             Reserved for notebook-based verification
 
 ## Setup and run
 
-Install the dependencies in `requirements.txt`, then use either the notebook workflow or the one-command pipeline runner:
-
-- Run the full project pipeline from any working directory:
-  `python run_pipeline.py`
-- The pipeline writes:
-  - `data/interim/city_day_clean.csv`
-  - `data/processed/city_day_features.csv`
-  - `models/random_forest_aqi.pkl`
-  - `reports/metrics.csv`
+Install the dependencies in `requirements.txt`, then use the notebook workflow below.
 
 Notebook workflow:
 
