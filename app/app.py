@@ -8,6 +8,7 @@ import time
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
@@ -142,12 +143,25 @@ if not city_summary.empty:
 monthly = get_monthly_trends(filtered_df)
 if not monthly.empty:
     st.subheader("Monthly AQI trend")
-    st.line_chart(monthly.set_index("Month")["Average AQI"], use_container_width=True)
+    fig, ax = plt.subplots(figsize=(10, 4))
+    ax.plot(monthly["Month"], monthly["Average AQI"], marker="o")
+    ax.set(xlabel="Month", ylabel="Average AQI", xticks=monthly["Month"])
+    ax.grid(axis="y", alpha=0.25)
+    fig.tight_layout()
+    st.pyplot(fig, use_container_width=True)
+    plt.close(fig)
 
-st.subheader("AQI by city")
 city_bar = city_summary[["City", "Average AQI"]].set_index("City") if not city_summary.empty else pd.DataFrame()
 if not city_bar.empty:
-    st.bar_chart(city_bar, use_container_width=True)
+    st.subheader("Average AQI by city")
+    city_bar = city_bar.sort_values("Average AQI", ascending=True)
+    fig, ax = plt.subplots(figsize=(10, max(4, len(city_bar) * 0.28)))
+    ax.barh(city_bar.index, city_bar["Average AQI"], color="#41a6a0")
+    ax.set(xlabel="Average AQI", ylabel="City")
+    ax.grid(axis="x", alpha=0.25)
+    fig.tight_layout()
+    st.pyplot(fig, use_container_width=True)
+    plt.close(fig)
 
 st.subheader("Pollutant relationship with AQI")
 pollutants = [
@@ -157,7 +171,13 @@ pollutants = [
 selected_pollutant = st.selectbox("Select pollutant for scatter plot", pollutants, index=0 if pollutants else None)
 if selected_pollutant and "AQI" in filtered_df.columns:
     scatter_df = filtered_df[[selected_pollutant, "AQI"]].dropna()
-    st.scatter_chart(scatter_df, x=selected_pollutant, y="AQI", use_container_width=True)
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.scatter(scatter_df[selected_pollutant], scatter_df["AQI"], alpha=0.45, s=16)
+    ax.set(xlabel=selected_pollutant, ylabel="AQI")
+    ax.grid(alpha=0.2)
+    fig.tight_layout()
+    st.pyplot(fig, use_container_width=True)
+    plt.close(fig)
 
 st.subheader("Latest AQI snapshot")
 latest = filtered_df.sort_values("Date").tail(15) if "Date" in filtered_df.columns else filtered_df.head(15)
