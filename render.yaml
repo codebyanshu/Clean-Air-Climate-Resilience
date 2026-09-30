@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: clean-air-climate-resilience
+    runtime: python
+    plan: free
+    buildCommand: pip install -r app/requirements_app.txt
+    startCommand: streamlit run app/app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.11
